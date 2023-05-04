@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class userGuid : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,8 +17,8 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    MainUser = table.Column<int>(type: "int", nullable: false),
-                    SuggestedUser = table.Column<int>(type: "int", nullable: false),
+                    MainUser = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SuggestedUser = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DateView = table.Column<DateTime>(type: "datetime2", nullable: true),
                     View = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
                 },

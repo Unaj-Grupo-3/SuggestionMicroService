@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230429093710_init")]
-    partial class init
+    [Migration("20230504045054_userGuid")]
+    partial class userGuid
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,11 +36,11 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime?>("DateView")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("MainUser")
-                        .HasColumnType("int");
+                    b.Property<Guid>("MainUser")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("SuggestedUser")
-                        .HasColumnType("int");
+                    b.Property<Guid>("SuggestedUser")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("View")
                         .ValueGeneratedOnAdd()
