@@ -1,4 +1,7 @@
+using Application.Interfaces;
+using Application.UseCases;
 using Infrastructure.Persistence;
+using Infrastructure.Queries;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -72,6 +75,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(connectionString);
 });
+
+builder.Services.AddTransient<ISuggestionQueries, SuggestionQueries>();
+builder.Services.AddTransient<ISuggestionServices, SuggestionServices>();
+builder.Services.AddTransient<ITokenServices, TokenServices>();
+
 
 builder.Services.AddHostedService<Worker>();
 

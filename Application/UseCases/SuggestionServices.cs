@@ -19,5 +19,10 @@ namespace Application.UseCases
             IList<SuggestionResponse> sugg = await _queries.GetAllSuggestions();
             return sugg;
         }
+        public async Task<IList<SuggestionResponse>> GetSuggestionsByUserId(int userId)
+        {
+            IList<SuggestionResponse> sugg = await _queries.GetSuggestionsByUserId(userId);
+            return sugg;
+        }
     }
 }
