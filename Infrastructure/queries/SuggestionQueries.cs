@@ -2,6 +2,7 @@
 using Application.Models;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace Infrastructure.Queries
 {
@@ -22,6 +23,21 @@ namespace Infrastructure.Queries
                     MainUser = e.MainUser,
                     SuggestedUser = e.SuggestedUser,
                     View = e.View,
+                })
+                .ToListAsync();
+            return sugg;
+        }
+
+        public async Task<IList<SuggestionResponse>> GetSuggestionsByUserId(int userId)
+        {
+            IList<SuggestionResponse> sugg = await _context.Suggestions
+                .Where(s => s.MainUser == userId)
+                .Select(s => new SuggestionResponse
+                {
+                    Id= s.Id,
+                    MainUser = s.MainUser,
+                    SuggestedUser= s.SuggestedUser,
+                    View= s.View,
                 })
                 .ToListAsync();
             return sugg;

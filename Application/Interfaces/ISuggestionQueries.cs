@@ -4,7 +4,9 @@ namespace Application.Interfaces
 {
     public interface ISuggestionQueries
     {
-        public Task<IList<SuggestionResponse>> GetAllSuggestions();
+        Task<IList<SuggestionResponse>> GetAllSuggestions();
+        Task<IList<SuggestionResponse>> GetSuggestionsByUserId(int userId);
+
 
     }
 }
