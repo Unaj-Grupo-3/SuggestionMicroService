@@ -94,6 +94,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddHostedService<Worker>();
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
