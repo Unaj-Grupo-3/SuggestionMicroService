@@ -1,11 +1,12 @@
 ﻿
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Application.Interfaces
 {
     public interface IUserApiServices
     {
-        Task<bool> GetAllUsers();
+        Task<JsonNode> GetAllUsers();
 
         Task<bool> GetUsersByList(List<int> userIds);
 
