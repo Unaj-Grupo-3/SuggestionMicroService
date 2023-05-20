@@ -1,4 +1,8 @@
+using Application.Interfaces;
+using Application.UseCases;
+using Infrastructure.Commands;
 using Infrastructure.Persistence;
+using Infrastructure.Queries;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -63,26 +67,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 
 //Custom
-var connectionString = "";
-Console.WriteLine(Directory.GetCurrentDirectory());
-var gab = "C:\\Users\\Gabo\\Documents\\Backup\\unaj\\ProyectoDeSoftware_1\\2023-Primer-cuatri\\Grupal\\AppDeCitas\\UserMicroService2\\Template2\\Template2";
-var fran = @"C:\Users\LopezFranco\Desktop\Proyecto Sofware 2023\ExpressoDelasDiez\UserMicroService2\Template2\Template2";
-
-if (Directory.GetCurrentDirectory() == gab)
-{
-    connectionString =
-        builder.Configuration["ConnectionString2"];
-}
-if (Directory.GetCurrentDirectory() == fran)
-{
-    connectionString =
-        builder.Configuration["DefaultConnection"];
-}
-else
-{
-    // MSSQL running locally
-    connectionString = builder.Configuration["ConnectionString"];
-}
+var connectionString = builder.Configuration["ConnectionString"];
 
 Console.WriteLine(connectionString);
 
@@ -91,6 +76,17 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(connectionString);
 });
+
+builder.Services.AddScoped<ISuggestionQueries, SuggestionQueries>();
+builder.Services.AddScoped<ISuggestionCommands, SuggestionCommands>();
+builder.Services.AddScoped<ISuggestionServices, SuggestionServices>();
+builder.Services.AddSingleton<ITokenServices, TokenServices>();
+
+builder.Services.AddHttpClient<IUserApiServices, UserApiServices>();
+
+builder.Services.AddHttpClient<IPreferenceApiServices, PreferenceApiServices>();
+
+builder.Services.AddHttpClient<IMatchApiServices, MatchApiServices>();
 
 builder.Services.AddHostedService<Worker>();
 

@@ -1,12 +1,11 @@
-﻿
-
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
 namespace Application.Interfaces
 {
     public interface ITokenServices
     {
-        bool IsExpiredToken(ClaimsIdentity identity);
         bool ValidateUserId(ClaimsIdentity identity, int userId);
+        int GetUserId(ClaimsIdentity identity);
+
     }
 }
