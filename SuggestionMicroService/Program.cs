@@ -77,10 +77,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString);
 });
 
+
 builder.Services.AddScoped<ISuggestionQueries, SuggestionQueries>();
 builder.Services.AddScoped<ISuggestionCommands, SuggestionCommands>();
 builder.Services.AddScoped<ISuggestionServices, SuggestionServices>();
 builder.Services.AddSingleton<ITokenServices, TokenServices>();
+
 
 builder.Services.AddHttpClient<IUserApiServices, UserApiServices>();
 
@@ -88,7 +90,10 @@ builder.Services.AddHttpClient<IPreferenceApiServices, PreferenceApiServices>();
 
 builder.Services.AddHttpClient<IMatchApiServices, MatchApiServices>();
 
+
 builder.Services.AddHostedService<Worker>();
+builder.Services.AddHostedService<Worker>().AddSingleton<ISuggestionWorkerServices, SuggestionWorkerServices>();
+
 
 
 var app = builder.Build();

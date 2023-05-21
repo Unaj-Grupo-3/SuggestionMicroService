@@ -18,49 +18,54 @@ namespace Application.UseCases
             _httpClient = httpClient;
         }
 
-        public async Task<JsonNode> GetAllUsers()
+        public async Task<JsonDocument> GetAllUsers()
         {
             try
             {
                 var response = await _httpClient.GetAsync(_url);
                 if(response.IsSuccessStatusCode)
                 {
-                    var jsonResult= JsonObject.Parse(response.Content.ReadAsStringAsync().Result);
+                    var jsonResult= JsonDocument.Parse(response.Content.ReadAsStringAsync().Result);
                     _message = "Se ha obtenido el documento correctamente";
                     _statusCode = 200;
                     return jsonResult;
                 }
                 _message = "No se ha podido obtener el documento mediante la peticion.";
                 _statusCode = 404;
-                return JsonObject.Parse("{ }");
+                return JsonDocument.Parse("{ }");
             }
             catch (Exception e)
             {
                 _message= e.Message;
-                return JsonObject.Parse("{ }");
+                return JsonDocument.Parse("{ }");
             }
         }
 
-        public Task<bool> GetUsersByList(List<int> userIds)
+        public async Task<JsonDocument> GetUsersByList(List<int> userIds)
         {
             try
             {
-                var response = await _httpClient.GetAsync(_url);
+                string paramRequest = "";
+                for (int i = 0; i < userIds.Count; i++)
+                {
+                    paramRequest = paramRequest + string.Format("usersId={0}&", userIds[i]);
+                }
+                var response = await _httpClient.GetAsync(_url + "/userByIds?" + paramRequest);
                 if (response.IsSuccessStatusCode)
                 {
-                    var jsonResult = JsonObject.Parse(response.Content.ReadAsStringAsync().Result);
+                    var jsonResult = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result);
                     _message = "Se ha obtenido el documento correctamente";
                     _statusCode = 200;
                     return jsonResult;
                 }
                 _message = "No se ha podido obtener el documento mediante la peticion.";
                 _statusCode = 404;
-                return JsonObject.Parse("{ }");
+                return JsonDocument.Parse("{ }");
             }
             catch (Exception e)
             {
                 _message = e.Message;
-                return JsonObject.Parse("{ }");
+                return JsonDocument.Parse("{ }");
             }
         }
 

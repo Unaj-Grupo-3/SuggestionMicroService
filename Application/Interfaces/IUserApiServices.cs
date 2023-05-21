@@ -6,9 +6,9 @@ namespace Application.Interfaces
 {
     public interface IUserApiServices
     {
-        Task<JsonNode> GetAllUsers();
+        Task<JsonDocument> GetAllUsers();
 
-        Task<bool> GetUsersByList(List<int> userIds);
+        Task<JsonDocument> GetUsersByList(List<int> userIds);
 
         string GetMessage();
 

@@ -5,9 +5,9 @@ namespace Application.Interfaces
 {
     public interface IPreferenceApiServices
     {
-        Task<bool> GetAllPreference();
+        Task<JsonDocument> GetAllPreference();
 
-        Task<bool> GetPreferencesByList(List<int> preferenceIds);
+        Task<JsonDocument> GetPreferencesByList(List<int> preferenceIds);
 
         string GetMessage();
 

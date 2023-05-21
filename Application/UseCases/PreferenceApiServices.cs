@@ -2,6 +2,7 @@
 
 using Application.Interfaces;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Application.UseCases
 {
@@ -19,14 +20,55 @@ namespace Application.UseCases
             _httpClient = httpClient;
         }
 
-        public Task<bool> GetAllPreference()
+        public async Task<JsonDocument> GetAllPreference()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var response = await _httpClient.GetAsync(_url);
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonResult = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result);
+                    _message = "Se ha obtenido el documento correctamente";
+                    _statusCode = 200;
+                    return jsonResult;
+                }
+                _message = "No se ha podido obtener el documento mediante la peticion.";
+                _statusCode = 404;
+                return JsonDocument.Parse("{ }");
+            }
+            catch (Exception e)
+            {
+                _message = e.Message;
+                return JsonDocument.Parse("{ }");
+            }
         }
 
-        public Task<bool> GetPreferencesByList(List<int> preferenceIds)
+        public async Task<JsonDocument> GetPreferencesByList(List<int> preferenceIds)
         {
-            throw new NotImplementedException();
+            try
+            {
+                string paramRequest = "";
+                for (int i = 0; i < preferenceIds.Count; i++)
+                {
+                    paramRequest = paramRequest + string.Format("usersId={0}&", preferenceIds[i]);
+                }
+                var response = await _httpClient.GetAsync(_url + "/userByIds?" + paramRequest);
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonResult = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result);
+                    _message = "Se ha obtenido el documento correctamente";
+                    _statusCode = 200;
+                    return jsonResult;
+                }
+                _message = "No se ha podido obtener el documento mediante la peticion.";
+                _statusCode = 404;
+                return JsonDocument.Parse("{ }");
+            }
+            catch (Exception e)
+            {
+                _message = e.Message;
+                return JsonDocument.Parse("{ }");
+            }
         }
 
         public string GetMessage()

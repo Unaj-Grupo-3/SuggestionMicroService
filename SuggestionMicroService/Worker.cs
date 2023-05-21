@@ -1,4 +1,6 @@
 using Application.Interfaces;
+using Application.UseCases;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SuggestionMicroService
 {
@@ -8,14 +10,23 @@ namespace SuggestionMicroService
         private readonly IUserApiServices _userApiServices;
         private readonly IMatchApiServices _matchApiServices;
         private readonly IPreferenceApiServices _preferenceApiServices;
+        private readonly ISuggestionWorkerServices _suggestionWorkerServices;
 
-
-        public Worker(ILogger<Worker> logger, IUserApiServices user, IPreferenceApiServices preference, IMatchApiServices match)
+        public Worker
+        (
+            ILogger<Worker> logger, 
+            IUserApiServices user, 
+            IPreferenceApiServices preference, 
+            IMatchApiServices match, 
+            ISuggestionWorkerServices suggestionWorkerServices
+            )
         {
             _logger = logger;
             _userApiServices = user;
             _preferenceApiServices = preference;
             _matchApiServices = match;
+            _suggestionWorkerServices = suggestionWorkerServices;
+            
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -23,7 +34,7 @@ namespace SuggestionMicroService
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(10000, stoppingToken);
+                await Task.Delay(30000, stoppingToken);
             }
         }
     }
