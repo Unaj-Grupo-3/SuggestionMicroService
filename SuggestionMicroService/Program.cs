@@ -72,17 +72,18 @@ var connectionString = builder.Configuration["ConnectionString"];
 Console.WriteLine(connectionString);
 
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContextPool<AppDbContext>(options =>
 {
     options.UseSqlServer(connectionString);
 });
+builder.Services.AddSingleton<AppDbContext>();
 
 
-builder.Services.AddScoped<ISuggestionQueries, SuggestionQueries>();
-builder.Services.AddScoped<ISuggestionCommands, SuggestionCommands>();
-builder.Services.AddScoped<ISuggestionServices, SuggestionServices>();
+builder.Services.AddSingleton<ISuggestionQueries, SuggestionQueries>();
+builder.Services.AddSingleton<ISuggestionCommands, SuggestionCommands>();
+builder.Services.AddSingleton<ISuggestionServices, SuggestionServices>();
 builder.Services.AddSingleton<ITokenServices, TokenServices>();
-
+builder.Services.AddSingleton<ISuggestionWorkerServices, SuggestionWorkerServices>();
 
 builder.Services.AddHttpClient<IUserApiServices, UserApiServices>();
 
@@ -92,7 +93,9 @@ builder.Services.AddHttpClient<IMatchApiServices, MatchApiServices>();
 
 
 builder.Services.AddHostedService<Worker>();
-builder.Services.AddHostedService<Worker>().AddSingleton<ISuggestionWorkerServices, SuggestionWorkerServices>();
+
+builder.Services.AddSingleton<IScopedProcessingService, DefaultScopedProcessingService>();
+//builder.Services.AddHostedService<Worker>().AddSingleton<ISuggestionWorkerServices, SuggestionWorkerServices>();
 
 
 

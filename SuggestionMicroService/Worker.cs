@@ -7,26 +7,21 @@ namespace SuggestionMicroService
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private readonly IUserApiServices _userApiServices;
-        private readonly IMatchApiServices _matchApiServices;
-        private readonly IPreferenceApiServices _preferenceApiServices;
+        private readonly IScopedProcessingService _processingService;
         private readonly ISuggestionWorkerServices _suggestionWorkerServices;
 
         public Worker
         (
             ILogger<Worker> logger, 
-            IUserApiServices user, 
-            IPreferenceApiServices preference, 
-            IMatchApiServices match, 
-            ISuggestionWorkerServices suggestionWorkerServices
+            ISuggestionWorkerServices suggestionWorkerServices,
+            IScopedProcessingService processingService
             )
         {
             _logger = logger;
-            _userApiServices = user;
-            _preferenceApiServices = preference;
-            _matchApiServices = match;
             _suggestionWorkerServices = suggestionWorkerServices;
-            
+            _processingService = processingService;
+
+
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -34,6 +29,8 @@ namespace SuggestionMicroService
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                await _suggestionWorkerServices.GenerateSuggestionAll();
+                //_processingService.DoWorkAsync(stoppingToken);
                 await Task.Delay(30000, stoppingToken);
             }
         }

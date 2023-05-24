@@ -1,17 +1,13 @@
 ﻿using Application.Interfaces;
 using Application.Models;
 using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
+using Application.Helpers;
 
 namespace Application.UseCases
 {
-    public class SuggestionWorkerServices: ISuggestionWorkerServices, IDisposable
+    public class SuggestionWorkerServices: ISuggestionWorkerServices
     {
         private readonly IPreferenceApiServices _preferenceApiServices;
         private readonly IUserApiServices _userApiServices;
@@ -36,6 +32,7 @@ namespace Application.UseCases
 
         public async Task GenerateSuggestionAll()
         {
+            // borrado general en full - borrado por ID en comun
             // Hay que insertar los casos de sugerencias
             JsonDocument jsonUser = await _userApiServices.GetAllUsers();
             JsonDocument jsonPreference = await _preferenceApiServices.GetAllPreference();
@@ -51,13 +48,25 @@ namespace Application.UseCases
 
                 foreach (UserPreferencesResponse suggestedPreference in convertPreference.Result)
                 {
-                    if (mainUserId.Equals(suggestedPreference.UserId)) { continue; } // No calcula el mismo usuario
                     var suggestedUser = convertUser.Result.FirstOrDefault(x => x.UserId == suggestedPreference.UserId);
+                    if (mainPreferenceResponse == null)
+                    {
+                        Suggestion suggestion = new Suggestion()
+                        {
+                            MainUser = mainUserId,
+                            SuggestedUser = suggestedUser.UserId,
+                            DateView = null,
+                            View = false
+                        };
+                        await _suggestionCommand.InsertSuggestion(suggestion);
+                    }
+                    if (mainUserId.Equals(suggestedPreference.UserId)) { continue; } // No calcula el mismo usuario
                     var suggestedGender = suggestedUser.Gender.GenderId;
                     var suggestedAge= DateTime.Today.AddTicks(suggestedUser.Birthday.Ticks).Year - 1;
 
                     // Calcular distancia
-                    // if(ditancia entre usuarios > mainPreferenceResponse.Distance) {break;}
+                    var distance = CalculateDistance.Calculate(item.Location.Longitude, suggestedUser.Location.Longitude, item.Location.Latitude, suggestedUser.Location.Latitude);
+                    if(distance > mainPreferenceResponse.Distance) {continue;} //contemplar una tolerancia de +- 1km
 
                     if (!mainPreferenceResponse.GendersPreferencesId.Contains(suggestedGender) && mainPreferenceResponse.GendersPreferencesId.Count>0) { continue; } // Si no es del genero en preferencia y si tiene preferencias de genero, saltea
                     if(suggestedAge < mainPreferenceResponse.SinceAge || suggestedAge > mainPreferenceResponse.UntilAge) { continue; } //Si no esta dentro de la edad preferida, saltea
@@ -77,7 +86,6 @@ namespace Application.UseCases
                                     SuggestedUser = suggestedUser.UserId,
                                     DateView = null,
                                     View = false
-
                                 };
                                 await _suggestionCommand.InsertSuggestion(suggestion);
                             }
@@ -180,11 +188,6 @@ namespace Application.UseCases
         }
 
         public Task<int> CountSuggestion(int userId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Dispose()
         {
             throw new NotImplementedException();
         }
