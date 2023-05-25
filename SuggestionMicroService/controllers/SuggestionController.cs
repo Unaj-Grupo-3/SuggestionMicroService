@@ -20,6 +20,7 @@ namespace SuggestionMicroService.Controllers
             _suggestionServices = suggestionServices;
             _tokenServices = tokenServices;
         }
+
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -44,6 +45,9 @@ namespace SuggestionMicroService.Controllers
                 int userId = _tokenServices.GetUserId(identity);
 
                 IList<SuggestionResponse> response = await _suggestionServices.GetSuggestionsByUserId(userId);
+
+                
+
                 return new JsonResult(new { Count = response.Count, Response = response }) { StatusCode = 200 };
             }
             catch (Exception ex)
