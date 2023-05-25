@@ -94,11 +94,6 @@ builder.Services.AddHttpClient<IMatchApiServices, MatchApiServices>();
 
 builder.Services.AddHostedService<Worker>();
 
-builder.Services.AddSingleton<IScopedProcessingService, DefaultScopedProcessingService>();
-//builder.Services.AddHostedService<Worker>().AddSingleton<ISuggestionWorkerServices, SuggestionWorkerServices>();
-
-
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

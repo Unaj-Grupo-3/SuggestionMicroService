@@ -7,21 +7,12 @@ namespace SuggestionMicroService
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private readonly IScopedProcessingService _processingService;
         private readonly ISuggestionWorkerServices _suggestionWorkerServices;
 
-        public Worker
-        (
-            ILogger<Worker> logger, 
-            ISuggestionWorkerServices suggestionWorkerServices,
-            IScopedProcessingService processingService
-            )
+        public Worker(ILogger<Worker> logger, ISuggestionWorkerServices suggestionWorkerServices)
         {
             _logger = logger;
             _suggestionWorkerServices = suggestionWorkerServices;
-            _processingService = processingService;
-
-
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -30,8 +21,8 @@ namespace SuggestionMicroService
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 await _suggestionWorkerServices.GenerateSuggestionAll();
-                //_processingService.DoWorkAsync(stoppingToken);
-                await Task.Delay(30000, stoppingToken);
+                // Ejecuta cada 30 minutos.
+                await Task.Delay(60000 * 30, stoppingToken);
             }
         }
     }

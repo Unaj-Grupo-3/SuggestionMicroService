@@ -3,6 +3,7 @@
 using Application.Interfaces;
 using Domain.Entities;
 using Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Commands
 {
@@ -20,6 +21,12 @@ namespace Infrastructure.Commands
             _context.Suggestions.Remove(suggestion);
 
             await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteSuggestionAll()
+        {
+            _context.Suggestions.ExecuteDelete();
             return true;
         }
 
