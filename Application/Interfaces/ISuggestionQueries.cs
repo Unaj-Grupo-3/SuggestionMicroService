@@ -1,11 +1,12 @@
 ﻿using Application.Models;
+using Domain.Entities;
 
 namespace Application.Interfaces
 {
     public interface ISuggestionQueries
     {
-        Task<IList<SuggestionResponse>> GetAllSuggestions();
-        Task<IList<SuggestionResponse>> GetSuggestionsByUserId(int userId);
+        Task<IList<Suggestion>> GetAllSuggestions();
+        Task<IList<Suggestion>> GetSuggestionsByUserId(int userId);
 
 
     }

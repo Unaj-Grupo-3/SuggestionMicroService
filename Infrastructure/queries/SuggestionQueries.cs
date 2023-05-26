@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Application.Models;
+using Domain.Entities;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
@@ -14,31 +15,17 @@ namespace Infrastructure.Queries
         {
             _context = context;
         }
-        public async Task<IList<SuggestionResponse>> GetAllSuggestions()
+        public async Task<IList<Suggestion>> GetAllSuggestions()
         {
-            IList<SuggestionResponse> sugg = await _context.Suggestions
-                .Select(e => new SuggestionResponse
-                {
-                    Id = e.Id,
-                    MainUser = e.MainUser,
-                    SuggestedUser = e.SuggestedUser,
-                    View = e.View,
-                })
+            IList<Suggestion> sugg = await _context.Suggestions
                 .ToListAsync();
             return sugg;
         }
 
-        public async Task<IList<SuggestionResponse>> GetSuggestionsByUserId(int userId)
+        public async Task<IList<Suggestion>> GetSuggestionsByUserId(int userId)
         {
-            IList<SuggestionResponse> sugg = await _context.Suggestions
+            IList<Suggestion> sugg = await _context.Suggestions
                 .Where(s => s.MainUser == userId)
-                .Select(s => new SuggestionResponse
-                {
-                    Id= s.Id,
-                    MainUser = s.MainUser,
-                    SuggestedUser= s.SuggestedUser,
-                    View= s.View,
-                })
                 .ToListAsync();
             return sugg;
         }

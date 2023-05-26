@@ -1,11 +1,12 @@
-﻿namespace Application.Models
+﻿using System.Text.Json;
+using System.Text.Json.Nodes;
+
+namespace Application.Models
 {
     public class SuggestionResponse
     {
-        public int Id { get; set; }
-        public int MainUser { get; set; }
-        public int SuggestedUser { get; set; }
-        public bool View { get; set; }
+        public UserResponse MainUser { get; set; }
+        public IList<SuggestedUser> SuggestedUsers { get; set; } 
 
     }
 }

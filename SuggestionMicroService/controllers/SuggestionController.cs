@@ -1,9 +1,11 @@
 ﻿using Application.Interfaces;
 using Application.Models;
+using Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace SuggestionMicroService.Controllers
@@ -26,7 +28,7 @@ namespace SuggestionMicroService.Controllers
         {
             try
             {
-                IList<SuggestionResponse> response = await _suggestionServices.GetAll();
+                IList<Suggestion> response = await _suggestionServices.GetAll();
                 return new JsonResult(new { Count = response.Count, Response = response }) { StatusCode = 200 };
             }
             catch (Exception ex)
@@ -44,11 +46,11 @@ namespace SuggestionMicroService.Controllers
                 var identity = HttpContext.User.Identity as ClaimsIdentity;
                 int userId = _tokenServices.GetUserId(identity);
 
-                IList<SuggestionResponse> response = await _suggestionServices.GetSuggestionsByUserId(userId);
+                //IList<SuggestionResponse> response = await _suggestionServices.GetSuggestionsByUserId(userId);
+                SuggestionResponse response = new();
+                response = await _suggestionServices.GetSuggestionsByUserId(userId);
 
-                
-
-                return new JsonResult(new { Count = response.Count, Response = response }) { StatusCode = 200 };
+                return new JsonResult(response) { StatusCode = 200 };
             }
             catch (Exception ex)
             {

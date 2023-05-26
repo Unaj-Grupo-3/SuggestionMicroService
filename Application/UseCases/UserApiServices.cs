@@ -2,6 +2,7 @@
 using Application.Models;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using System.Net.Http;
 using System.Text.Json;
 
 
@@ -109,11 +110,12 @@ namespace Application.UseCases
             }
         }
 
-        public async Task<JsonDocument> GetUsersByList(List<int> userIds)
+        public async Task<List<UserResponse>?> GetUsersByList(List<int> userIds)
         {
             try
             {
-                
+                List<UserResponse> userList = new List<UserResponse>();
+
                 string paramRequest = "";
                 for (int i = 0; i < userIds.Count; i++)
                 {
@@ -122,21 +124,76 @@ namespace Application.UseCases
 
                 _httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
                 var response = await _httpClient.GetAsync(_url + "/true?" + paramRequest);
-                if (response.IsSuccessStatusCode)
+
+                if (response != null && response.IsSuccessStatusCode)
                 {
-                    var jsonResult = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result);
-                    _message = "Se ha obtenido el documento correctamente";
-                    _statusCode = 200;
-                    return jsonResult;
+                    var content = await response.Content.ReadAsStringAsync();
+                    JArray array = JArray.Parse(content);
+                    foreach (var i in array)
+                    {
+                        UserResponse user = new UserResponse();
+                        user.UserId = (int)i.SelectToken("userId");
+                        user.Name = (string)i.SelectToken("name");
+                        user.LastName = (string)i.SelectToken("lastName");
+                        user.Description = (string)i.SelectToken("description");
+                        user.Birthday = (DateTime)i.SelectToken("birthday");
+                        //birthday description location {id latitude longitude address } images[{id url}] gender {genderId description}
+                        // location
+                        JToken locationToken = i.SelectToken("location");
+                        if (locationToken != null)
+                        {
+                            LocationResponse location = new LocationResponse
+                            {
+                                Id = (int)locationToken.SelectToken("id"),
+                                Latitude = (double)locationToken.SelectToken("latitude"),
+                                Longitude = (double)locationToken.SelectToken("longitude"),
+                                Address = (string)locationToken.SelectToken("address")
+                            };
+                            user.Location = location;
+                        }
+
+                        // images
+                        JToken imagesToken = i.SelectToken("images");
+                        if (imagesToken != null && imagesToken.Type == JTokenType.Array)
+                        {
+                            IList<ImageResponse> images = new List<ImageResponse>();
+                            foreach (JToken imageToken in imagesToken)
+                            {
+                                ImageResponse image = new ImageResponse
+                                {
+                                    Id = (int)imageToken.SelectToken("id"),
+                                    Url = (string)imageToken.SelectToken("url")
+                                };
+                                images.Add(image);
+                            }
+                            user.Images = images;
+                        }
+
+                        // gender
+                        JToken genderToken = i.SelectToken("gender");
+                        if (genderToken != null)
+                        {
+                            GenderResponse gender = new GenderResponse
+                            {
+                                GenderId = (int)genderToken.SelectToken("genderId"),
+                                Description = (string)genderToken.SelectToken("description")
+                            };
+                            user.Gender = gender;
+                        }
+
+                        userList.Add(user);
+                    }
+
+                    return userList;
                 }
-                _message = "No se ha podido obtener el documento mediante la peticion.";
-                _statusCode = 404;
-                return JsonDocument.Parse("{ }");
+                else
+                {
+                    return null;
+                }
             }
-            catch (Exception e)
+            catch (HttpRequestException)
             {
-                _message = e.Message;
-                return JsonDocument.Parse("{ }");
+                return null;
             }
         }
 
