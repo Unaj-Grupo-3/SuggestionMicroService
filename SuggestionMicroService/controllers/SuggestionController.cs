@@ -39,7 +39,7 @@ namespace SuggestionMicroService.Controllers
 
         [HttpGet("me")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetUserMatchesMe()
+        public async Task<IActionResult> GetSuggestionMe()
         {
             try
             {
@@ -57,9 +57,5 @@ namespace SuggestionMicroService.Controllers
                 return new JsonResult(new { ex.Message }) { StatusCode = 500 };
             }
         }
-
-
-
-
     }
 }

@@ -51,7 +51,7 @@ namespace Application.UseCases
             //response
             IList<SuggestedUser> suggestedUsers = new List<SuggestedUser>();
 
-            if (userList.Count > 1) 
+            if (userList != null && userList.Count > 1) 
             {
                 for (int i = 1; i < userList.Count; i++)
                 {
