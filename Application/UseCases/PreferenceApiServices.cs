@@ -140,8 +140,6 @@ namespace Application.UseCases
             }
         }
 
-
-
         public string GetMessage()
         {
             return _message;

@@ -11,13 +11,14 @@ namespace Application.UseCases
         private readonly ISuggestionCommands _commands;
         private readonly ISuggestionQueries _queries;
         private readonly IUserApiServices _userApiServices;
+        private readonly IPreferenceApiServices _preferenceApiServices;
 
-
-        public SuggestionServices(ISuggestionCommands commands, ISuggestionQueries queries, IUserApiServices userApiServices)
+        public SuggestionServices(ISuggestionCommands commands, ISuggestionQueries queries, IUserApiServices userApiServices, IPreferenceApiServices preferenceApiServices)
         {
             _commands = commands;
             _queries = queries;
             _userApiServices = userApiServices;
+            _preferenceApiServices = preferenceApiServices;
         }
 
         public async Task<IList<Suggestion>> GetAll()
