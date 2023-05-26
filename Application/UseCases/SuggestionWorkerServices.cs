@@ -27,7 +27,7 @@ namespace Application.UseCases
 
         public async Task GenerateSuggestionXUser(int userId)
         {
-            throw new ArgumentException();
+            var jsonPreference = await _preferenceApiServices.GetAllPreferenceObj();
         }
 
         public async Task GenerateSuggestionAll()
@@ -66,7 +66,7 @@ namespace Application.UseCases
 
                     // Calcular distancia
                     var distance = CalculateDistance.Calculate(item.Location.Longitude, suggestedUser.Location.Longitude, item.Location.Latitude, suggestedUser.Location.Latitude);
-                    //if(distance >= mainPreferenceResponse.Distance +1) {continue;} //contemplar una tolerancia de +- 1km
+                    if(distance >= mainPreferenceResponse.Distance +1) {continue;} //contemplar una tolerancia de +- 1km
 
                     if (!mainPreferenceResponse.GendersPreferencesId.Contains(suggestedGender) && mainPreferenceResponse.GendersPreferencesId.Count>0) { continue; } // Si no es del genero en preferencia y si tiene preferencias de genero, saltea
                     if(suggestedAge < mainPreferenceResponse.SinceAge || suggestedAge > mainPreferenceResponse.UntilAge) { continue; } //Si no esta dentro de la edad preferida, saltea
