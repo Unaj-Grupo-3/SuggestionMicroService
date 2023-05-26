@@ -1,5 +1,6 @@
 ﻿
 using Application.Interfaces;
+using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 
 namespace Application.UseCases
@@ -9,13 +10,15 @@ namespace Application.UseCases
         private string? _message;
         private string? _response;
         private int _statusCode;
+        private readonly string _apiKey;
         private HttpClient _httpClient;
         private readonly string _url;
 
-        public MatchApiServices(HttpClient httpClient)
+        public MatchApiServices(HttpClient httpClient, IConfiguration configuration)
         {
             _url = "https://localhost:7199/api/v1/Match";
             _httpClient = httpClient;
+            _apiKey = configuration["ApiKey"];
         }
 
         public Task<bool> GetAllMatches()

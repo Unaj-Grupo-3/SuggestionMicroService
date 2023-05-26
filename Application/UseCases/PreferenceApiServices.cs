@@ -2,6 +2,7 @@
 
 using Application.Interfaces;
 using Application.Models;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -12,20 +13,23 @@ namespace Application.UseCases
     {
         private string? _message;
         private string? _response;
+        private readonly string _apiKey;
         private int _statusCode;
         private HttpClient _httpClient;
         private readonly string _url;
 
-        public PreferenceApiServices(HttpClient httpClient)
+        public PreferenceApiServices(HttpClient httpClient, IConfiguration configuration)
         {
             _url = "https://localhost:7175/api/v1/UserPreferences";
             _httpClient = httpClient;
+            _apiKey = configuration["ApiKey"];
         }
 
         public async Task<JsonDocument> GetAllPreference()
         {
             try
             {
+                _httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
                 var response = await _httpClient.GetAsync(_url);
                 if (response.IsSuccessStatusCode)
                 {
@@ -49,6 +53,7 @@ namespace Application.UseCases
         {
             try
             {
+                _httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
                 var response = await _httpClient.GetAsync(_url);
                 if (response.IsSuccessStatusCode)
                 {
@@ -115,7 +120,8 @@ namespace Application.UseCases
                 {
                     paramRequest = paramRequest + string.Format("usersId={0}&", preferenceIds[i]);
                 }
-                var response = await _httpClient.GetAsync(_url + "/userByIds?" + paramRequest);
+                _httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
+                var response = await _httpClient.GetAsync(_url + "/Ids?" + paramRequest + "fullResponse=true");
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonResult = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result);
@@ -133,8 +139,6 @@ namespace Application.UseCases
                 return JsonDocument.Parse("{ }");
             }
         }
-
-
 
         public string GetMessage()
         {

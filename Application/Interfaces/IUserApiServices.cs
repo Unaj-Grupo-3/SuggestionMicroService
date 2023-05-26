@@ -10,12 +10,13 @@ namespace Application.Interfaces
         Task<JsonDocument> GetAllUsers();
         Task<List<UserResponse>> GetAllUsersObj();
 
-        Task<JsonDocument> GetUsersByList(List<int> userIds);
+        Task<List<UserResponse>?> GetUsersByList(List<int> userIds);
 
         string GetMessage();
 
         JsonDocument GetResponse();
 
         int GetStatusCode();
+
     }
 }
