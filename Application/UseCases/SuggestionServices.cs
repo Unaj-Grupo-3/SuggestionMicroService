@@ -1,4 +1,5 @@
-﻿ using Application.Interfaces;
+﻿using Application.Helpers;
+using Application.Interfaces;
 using Application.Models;
 using Domain.Entities;
 using System.Text.Json;
@@ -29,7 +30,7 @@ namespace Application.UseCases
 
         public async Task<SuggestionResponse> GetSuggestionsByUserId(int userIds)
         {
-            List<int> prueba = new List<int> { 6, 7, 8 }; //borrar
+            SuggestionResponse response = new();
 
             //lista de ids [user, sug...]            
             List<int> ids = new();
@@ -51,26 +52,36 @@ namespace Application.UseCases
             //response
             IList<SuggestedUser> suggestedUsers = new List<SuggestedUser>();
 
-            if (userList != null && userList.Count > 1) 
+            UserResponse main = userList.FirstOrDefault(x => x.UserId == userIds);
+            userList = userList.Where(x => x.UserId != userIds).ToList();
+
+            if (userList != null && userList.Count > 0) 
             {
-                for (int i = 1; i < userList.Count; i++)
+                double longitud1 = main.Location.Longitude;
+                double latitud1 = main.Location.Latitude;
+
+                for (int i = 0; i < userList.Count; i++)
                 {
+                    double longitud2 = userList[i].Location.Longitude;
+                    double latitud2 = userList[i].Location.Latitude;
+                    int distance = CalculateDistance.Calculate(longitud1, longitud2, latitud1, latitud2);
                     SuggestedUser suggestedUser = new SuggestedUser
                     {
-                        Id = suggestions[i-1].Id,
-                        User = userList[i],
-                        DateView = suggestions[i-1].DateView,
-                        View = suggestions[i-1].View,
+                        Id = suggestions[i].Id,
+                        User = userList.FirstOrDefault(x => x.UserId == suggestions[i].SuggestedUser),
+                        DateView = suggestions[i].DateView,
+                        View = suggestions[i].View,
+                        Distance = distance,
+                        Preferences = null
                     };
                     suggestedUsers.Add(suggestedUser);
                 };
-            };
-
-            SuggestionResponse response = new()
-            {
-                MainUser = userList[0],
-                SuggestedUsers = suggestedUsers,
-            };
+                response = new()
+                {
+                    MainUser = main,
+                    SuggestedUsers = suggestedUsers,
+                };
+            }
 
             return response;
         }
