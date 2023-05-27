@@ -92,7 +92,7 @@ builder.Services.AddHttpClient<IPreferenceApiServices, PreferenceApiServices>();
 builder.Services.AddHttpClient<IMatchApiServices, MatchApiServices>();
 
 
-// builder.Services.AddHostedService<Worker>();
+builder.Services.AddHostedService<Worker>();
 
 var app = builder.Build();
 

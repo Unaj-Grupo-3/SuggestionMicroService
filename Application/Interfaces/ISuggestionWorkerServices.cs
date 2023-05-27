@@ -10,6 +10,5 @@ namespace Application.Interfaces
     {
         public Task GenerateSuggestionAll();
         public Task GenerateSuggestionXUser(int userId);
-        public Task<int> CountSuggestion(int userId);
     }
 }

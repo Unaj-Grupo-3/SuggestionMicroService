@@ -4,6 +4,7 @@ using Application.Interfaces;
 using Domain.Entities;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Infrastructure.Commands
 {
@@ -27,6 +28,12 @@ namespace Infrastructure.Commands
         public async Task<bool> DeleteSuggestionAll()
         {
             _context.Suggestions.ExecuteDelete();
+            return true;
+        }
+
+        public async Task<bool> DeleteWorkerSuggByUserId(int userId)
+        {
+            _context.Suggestions.Where(x=> x.MainUser== userId).ExecuteDelete();
             return true;
         }
 
