@@ -111,32 +111,109 @@ namespace Application.UseCases
             }
         }
 
-        public async Task<JsonDocument> GetPreferencesByList(List<int> preferenceIds)
+        public async Task<IList<PreferenceResponse>> GetPreferencesByList(List<int> preferenceIds)
         {
             try
             {
                 string paramRequest = "";
                 for (int i = 0; i < preferenceIds.Count; i++)
                 {
-                    paramRequest = paramRequest + string.Format("usersId={0}&", preferenceIds[i]);
+                    paramRequest = paramRequest + string.Format("userIds={0}&", preferenceIds[i]);
                 }
                 _httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
                 var response = await _httpClient.GetAsync(_url + "/Ids?" + paramRequest + "fullResponse=true");
+
                 if (response.IsSuccessStatusCode)
                 {
-                    var jsonResult = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result);
+                    var jsonResult = response.Content.ReadAsStringAsync();
                     _message = "Se ha obtenido el documento correctamente";
                     _statusCode = 200;
-                    return jsonResult;
+
+                    var preferencesList = new List<PreferenceResponse>();
+
+                    var list = JArray.Parse(jsonResult.Result);
+
+                    // Mapeo de preferencias 
+
+                    foreach (var preference in list)
+                    {
+                        PreferenceResponse preferenceMapp = new PreferenceResponse()
+                        {
+                            UserId = (int)preference.SelectToken("userId"),
+                            SinceAge = (int)preference.SelectToken("sinceAge"),
+                            UntilAge = (int)preference.SelectToken("untilAge"),
+                            Distance = (int)preference.SelectToken("distance"),
+                            GendersPreferences = new List<GenderPreferenceResponse>(),
+                            CategoryPreferences = new List<InterestCategoryResponse>(),
+
+                        };
+
+                        //Mapeo la preferencia del genero
+                        if (preference.SelectToken("gendersPreferencesId") != null)
+                        {
+                            foreach (var gender in preference.SelectToken("gendersPreferencesId").ToList())
+                            {
+                                GenderPreferenceResponse genderMapp = new GenderPreferenceResponse()
+                                {
+                                    UserId = (int)gender.SelectToken("userId"),
+                                    GenderId = (int)gender.SelectToken("genderId"),
+                                    GenderName = (string)gender.SelectToken("genderName")
+                                };
+
+                                preferenceMapp.GendersPreferences.Add(genderMapp);
+                            }
+                        }
+
+                        // Mapeo los intereses
+                        if (preference.SelectToken("categoryPreferencesId") != null)
+                        {
+                            foreach (var category in preference.SelectToken("categoryPreferencesId").ToList())
+                            {
+                                InterestCategoryResponse categoryMapp = new InterestCategoryResponse()
+                                {
+                                    Id = (int)category.SelectToken("id"),
+                                    Description = (string)category.SelectToken("description"),
+                                    InterestPreferencesId = new List<PreferenceResponseFull>()
+                                };
+
+                                if (category.SelectToken("interestPreferencesId") != null)
+                                {
+                                    foreach(var interest in category.SelectToken("interestPreferencesId").ToList())
+                                    {
+                                        PreferenceResponseFull interestMapp = new PreferenceResponseFull()
+                                        {
+                                            Interest = new InterestResponse()
+                                            {
+                                                Id = (int)interest.SelectToken("interest").SelectToken("id"),
+                                                Description = (string)interest.SelectToken("interest").SelectToken("description")
+                                            },
+                                            OwnInterest = (bool)interest.SelectToken("ownInterest"),
+                                            Like = (bool)interest.SelectToken("like")
+
+                                        };
+
+                                        categoryMapp.InterestPreferencesId.Add(interestMapp);
+                                    }
+                                }
+
+                                preferenceMapp.CategoryPreferences.Add(categoryMapp);
+                            }
+                        }
+
+                        preferencesList.Add(preferenceMapp);
+                    }
+
+                    return preferencesList;
                 }
                 _message = "No se ha podido obtener el documento mediante la peticion.";
                 _statusCode = 404;
-                return JsonDocument.Parse("{ }");
+                return new List<PreferenceResponse>();
+
             }
             catch (Exception e)
             {
                 _message = e.Message;
-                return JsonDocument.Parse("{ }");
+                return new List<PreferenceResponse>();
             }
         }
 

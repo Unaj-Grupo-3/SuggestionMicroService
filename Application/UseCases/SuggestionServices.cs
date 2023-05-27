@@ -2,7 +2,6 @@
 using Application.Interfaces;
 using Application.Models;
 using Domain.Entities;
-using System.Text.Json;
 
 namespace Application.UseCases
 {
@@ -50,8 +49,14 @@ namespace Application.UseCases
             IList<UserResponse> userList = new List<UserResponse>();
             userList = await _userApiServices.GetUsersByList(ids);
 
-            //response
-            IList<SuggestedUser> suggestedUsers = new List<SuggestedUser>();
+            //Info de lista de preferencias
+            IList<PreferenceResponse> preferenceList = new List<PreferenceResponse>();
+            preferenceList = await _preferenceApiServices.GetPreferencesByList(ids);
+
+            //Response
+            //IList<SuggestedUser> suggestedUsers = new List<SuggestedUser>();
+            IList<UserSuggestedRespose> suggestedUsers = new List<UserSuggestedRespose>();
+            IList<UserPreferencesResponse> suggestedPreference = new List<UserPreferencesResponse>();
 
             UserResponse main = userList.FirstOrDefault(x => x.UserId == userIds);
             userList = userList.Where(x => x.UserId != userIds).ToList();
@@ -66,16 +71,51 @@ namespace Application.UseCases
                     double longitud2 = userList[i].Location.Longitude;
                     double latitud2 = userList[i].Location.Latitude;
                     int distance = CalculateDistance.Calculate(longitud1, longitud2, latitud1, latitud2);
-                    SuggestedUser suggestedUser = new SuggestedUser
+
+                    UserSuggestedRespose userSuggestedRespose = new UserSuggestedRespose()
                     {
-                        Id = suggestions[i].Id,
-                        User = userList.FirstOrDefault(x => x.UserId == suggestions[i].SuggestedUser),
-                        DateView = suggestions[i].DateView,
-                        View = suggestions[i].View,
+                        UserId = userList[i].UserId,
+                        Name = userList[i].Name,
+                        LastName = userList[i].LastName,
+                        Description = userList[i].Description,
+                        Birthday = userList[i].Birthday,
+                        Location = userList[i].Location.Address,
                         Distance = distance,
-                        Preferences = null
+                        Gender = userList[i].Gender,
+                        Images = userList[i].Images,
+                        OurPreferences = new PreferenceSuggestedResponse()
+                        {
+                            OwnCategoryPreferences = new List<InterestCategoryResponse>(),
+                        }
                     };
-                    suggestedUsers.Add(suggestedUser);
+
+                    var PreferenceByUserId = preferenceList.FirstOrDefault(x => x.UserId == userList[i].UserId);
+
+                    foreach (var category in PreferenceByUserId.CategoryPreferences)
+                    {
+                        category.InterestPreferencesId = category.InterestPreferencesId.Where(x => x.OwnInterest).ToList();
+                    }
+
+                    userSuggestedRespose.OurPreferences.OwnCategoryPreferences = PreferenceByUserId.CategoryPreferences;
+
+                    //var intereses = PreferenceByUserId.CategoryPreferences.SelectMany(c => c.InterestPreferencesId)
+                    //        .Where(x => x.OwnInterest == true).ToList();
+
+
+
+                    //userSuggestedRespose.OurPreferences.OwnCategoryPreferences = intereses;
+
+                    //SuggestedUser suggestedUser = new SuggestedUser
+                    //{
+                    //    Id = suggestions[i].Id,
+                    //    User = userList.FirstOrDefault(x => x.UserId == suggestions[i].SuggestedUser),
+                    //    DateView = suggestions[i].DateView,
+                    //    View = suggestions[i].View,
+                    //    Distance = distance,
+                    //    Preferences = null
+                    //};
+
+                   suggestedUsers.Add(userSuggestedRespose);
                 };
                 response = new()
                 {

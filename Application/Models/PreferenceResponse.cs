@@ -6,7 +6,7 @@ namespace Application.Models
         public int SinceAge { get; set; } //OVERALL
         public int UntilAge { get; set; } //OVERALL
         public int Distance { get; set; } //OVERALL
-        public IEnumerable<GenderPreferenceResponse>? GendersPreferencesId { get; set; } //GENDERS
-        public IEnumerable<InterestCategoryResponse>? CategoryPreferencesId { get; set; }
+        public IList<GenderPreferenceResponse>? GendersPreferences { get; set; } //GENDERS
+        public IList<InterestCategoryResponse>? CategoryPreferences { get; set; }
     }
 }

@@ -2,7 +2,6 @@
 using Application.Models;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
-using System.Net.Http;
 using System.Text.Json;
 
 

@@ -9,7 +9,7 @@ namespace Application.Interfaces
         Task<JsonDocument> GetAllPreference();
         Task<List<UserPreferencesResponse>> GetAllPreferenceObj();
 
-        Task<JsonDocument> GetPreferencesByList(List<int> preferenceIds);
+        Task<IList<PreferenceResponse>> GetPreferencesByList(List<int> preferenceIds);
 
         string GetMessage();
 
