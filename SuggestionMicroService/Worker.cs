@@ -17,13 +17,36 @@ namespace SuggestionMicroService
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await _suggestionWorkerServices.GenerateSuggestionAll();
-                // Ejecuta cada 30 minutos.
-                await Task.Delay(60000 * 30, stoppingToken);
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+
+                    // Calcula nuevas sugerencias cuando la cantidad de sugerencias calculada baja del numero informado por parametros:
+                    var countUsers = await _suggestionWorkerServices.CountSuggestionsUsers(5);
+                    foreach (var user in countUsers)
+                    {
+                        await _suggestionWorkerServices.GenerateSuggestionXUser(user);
+                    }
+
+                    // Calcula sugerencias para los usuarios nuevos:
+                    var usersNew = await _suggestionWorkerServices.UsersNew();
+                    foreach (var user in usersNew)
+                    {
+                        await _suggestionWorkerServices.GenerateSuggestionXUser(user);
+                    }
+
+                    //await _suggestionWorkerServices.GenerateSuggestionAll();
+                    // Ejecuta cada 5 minutos.
+                    await Task.Delay(60000 * 5, stoppingToken);
+                }
             }
+            catch(Exception e)
+            {
+                _logger.LogInformation($"Error en el Worker: {e}");
+            }
+            
         }
     }
 }

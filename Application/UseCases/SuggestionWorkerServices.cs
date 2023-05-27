@@ -27,42 +27,27 @@ namespace Application.UseCases
 
         public async Task GenerateSuggestionXUser(int userId)
         {
-            var responseUser = await _userApiServices.GetAllUsersObj();
-            var responsePreference = await _preferenceApiServices.GetAllPreferenceObj();
-            var userMain = responseUser.FirstOrDefault(x => x.UserId == userId);
-            var suggestionsUser = await _suggestionQueries.GetSuggestionsByUserId(userId);
-
-            var countList = await _suggestionQueries.CountSuggestionsUsers();
-
-            foreach(var item in countList)
+            try
             {
+                var responseUser = await _userApiServices.GetAllUsersObj();
+                var responsePreference = await _preferenceApiServices.GetAllPreferenceObj();
 
-            }
-        }
+                var mainUser = responseUser.FirstOrDefault(x => x.UserId == userId); // Response de usuario
+                var mainPreference = responsePreference.FirstOrDefault(x => x.UserId == userId); // Response de preferencias de usuario
+                var mainAge = DateTime.Today.AddTicks(-mainUser.Birthday.Ticks).Year - 1; // Edad del main User
+                var mainGender = mainUser.Gender.GenderId; // Genero del main User
+                var suggestionsUser = await _suggestionQueries.GetSuggestionsByUserId(userId); // Sugerencias ya calculadas del usuario
 
-        public async Task GenerateSuggestionAll()
-        {
-            // borrado general en full - borrado por ID en comun
-            await _suggestionCommand.DeleteSuggestionAll();
-            // Hay que insertar los casos de sugerencias
-            var jsonUser = await _userApiServices.GetAllUsersObj();
-            var jsonPreference = await _preferenceApiServices.GetAllPreferenceObj();
-
-            foreach(UserResponse item in jsonUser)
-            {
-                var mainUserId = item.UserId;
-                var mainPreferenceResponse = jsonPreference.FirstOrDefault(x => x.UserId == mainUserId);
-                var mainAge = DateTime.Today.AddTicks(-item.Birthday.Ticks).Year - 1;
-                var mainGender = item.Gender.GenderId;
-
-                foreach (UserPreferencesResponse suggestedPreference in jsonPreference)
+                foreach (var item in responseUser)
                 {
-                    var suggestedUser = jsonUser.FirstOrDefault(x => x.UserId == suggestedPreference.UserId);
-                    if (mainPreferenceResponse == null) // Si el usuario principal no tiene preferencias, se sugiere a todos los que si tienen preferencias
+                    var suggestedUser = responseUser.FirstOrDefault(x => x.UserId == item.UserId);
+                    if (suggestedUser.UserId == userId) { continue; } // No calculamos a la misma persona parametrizada
+                    if (suggestionsUser.Select(x => x.SuggestedUser).ToList().Contains(item.UserId)) { continue; } // Si ya tiene al usuario calculado, lo ignora
+                    if (mainPreference == null)
                     {
                         Suggestion suggestion = new Suggestion()
                         {
-                            MainUser = mainUserId,
+                            MainUser = mainUser.UserId,
                             SuggestedUser = suggestedUser.UserId,
                             DateView = null,
                             View = false
@@ -70,31 +55,34 @@ namespace Application.UseCases
                         await _suggestionCommand.InsertSuggestion(suggestion);
                         continue;
                     }
-                    if (mainUserId.Equals(suggestedPreference.UserId)) { continue; } // No calcula el mismo usuario
-                    var suggestedGender = suggestedUser.Gender.GenderId;
-                    var suggestedAge= DateTime.Today.AddTicks(- suggestedUser.Birthday.Ticks).Year - 1;
-
                     // Calcular distancia
-                    var distance = CalculateDistance.Calculate(item.Location.Longitude, suggestedUser.Location.Longitude, item.Location.Latitude, suggestedUser.Location.Latitude);
-                    if(distance >= mainPreferenceResponse.Distance +1) {continue;} //contemplar una tolerancia de +- 1km
+                    var distance = CalculateDistance.Calculate(mainUser.Location.Longitude, item.Location.Longitude, mainUser.Location.Latitude, item.Location.Latitude);
+                    if (distance >= mainPreference.Distance + 1) { continue; } //contemplar una tolerancia de +- 1km
 
-                    if (!mainPreferenceResponse.GendersPreferencesId.Contains(suggestedGender) && mainPreferenceResponse.GendersPreferencesId.Count>0) { continue; } // Si no es del genero en preferencia y si tiene preferencias de genero, saltea
-                    if(suggestedAge < mainPreferenceResponse.SinceAge || suggestedAge > mainPreferenceResponse.UntilAge) { continue; } //Si no esta dentro de la edad preferida, saltea
-                    var suggestedInterest = suggestedPreference.OwnInterestPreferencesId;
-                    var mainInterest = mainPreferenceResponse.InterestPreferencesId;
+                    var suggestedAge = DateTime.Today.AddTicks(-item.Birthday.Ticks).Year - 1; // Edad del Suggested User
+                    var suggestedGender = item.Gender.GenderId; // Genero del Suggested User
+
+                    if (!mainPreference.GendersPreferencesId.Contains(suggestedGender) && mainPreference.GendersPreferencesId.Count > 0) { continue; } // Si no es del genero en preferencia y si tiene preferencias de genero, saltea
+                    if (suggestedAge < mainPreference.SinceAge || suggestedAge > mainPreference.UntilAge) { continue; } //Si no esta dentro de la edad preferida, saltea
+                    var suggestedPreference = responsePreference.FirstOrDefault(x => x.UserId == item.UserId);
+
+                    if (suggestedPreference == null) { continue; }
+
+                    var suggestedInterest = suggestedPreference.OwnInterestPreferencesId; // Intereses del sugerido
+                    var mainInterest = mainPreference.InterestPreferencesId; // Intereses del Main User
 
                     bool flagFoundSuggested = false; //Flag para cortar el bucle de busqueda de mainInterest
-                    // Recorre todos los intereses y si coincide alguno, lo toma como sugerencia
-                    foreach(int main in mainInterest)
+                                                     // Recorre todos los intereses y si coincide alguno, lo toma como sugerencia
+                    foreach (int main in mainInterest)
                     {
                         if (flagFoundSuggested || suggestedInterest.Count.Equals(0)) { break; }
                         foreach (int sugg in suggestedInterest)
                         {
-                            if ( sugg.Equals(main))
+                            if (sugg.Equals(main))
                             {
                                 Suggestion suggestion = new Suggestion()
                                 {
-                                    MainUser = mainUserId,
+                                    MainUser = mainUser.UserId,
                                     SuggestedUser = suggestedUser.UserId,
                                     DateView = null,
                                     View = false
@@ -105,9 +93,135 @@ namespace Application.UseCases
                             }
                         }
                     }
-                        
-                    
+
                 }
+            }
+            catch(Exception e)
+            {
+                _message = e.Message;
+            }
+
+
+        }
+
+        public async Task GenerateSuggestionAll()
+        {
+            try
+            {
+                // borrado general en full - borrado por ID en comun
+                await _suggestionCommand.DeleteSuggestionAll();
+                // Hay que insertar los casos de sugerencias
+                var jsonUser = await _userApiServices.GetAllUsersObj();
+                var jsonPreference = await _preferenceApiServices.GetAllPreferenceObj();
+
+                foreach (UserResponse item in jsonUser)
+                {
+                    var mainUserId = item.UserId;
+                    var mainPreferenceResponse = jsonPreference.FirstOrDefault(x => x.UserId == mainUserId);
+                    var mainAge = DateTime.Today.AddTicks(-item.Birthday.Ticks).Year - 1;
+                    var mainGender = item.Gender.GenderId;
+
+                    foreach (UserPreferencesResponse suggestedPreference in jsonPreference)
+                    {
+                        if (mainUserId.Equals(suggestedPreference.UserId)) { continue; } // No calcula el mismo usuario
+                        var suggestedUser = jsonUser.FirstOrDefault(x => x.UserId == suggestedPreference.UserId);
+                        if (mainPreferenceResponse == null) // Si el usuario principal no tiene preferencias, se sugiere a todos los que si tienen preferencias
+                        {
+                            Suggestion suggestion = new Suggestion()
+                            {
+                                MainUser = mainUserId,
+                                SuggestedUser = suggestedUser.UserId,
+                                DateView = null,
+                                View = false
+                            };
+                            await _suggestionCommand.InsertSuggestion(suggestion);
+                            continue;
+                        }
+
+                        var suggestedGender = suggestedUser.Gender.GenderId;
+                        var suggestedAge = DateTime.Today.AddTicks(-suggestedUser.Birthday.Ticks).Year - 1;
+
+                        // Calcular distancia
+                        var distance = CalculateDistance.Calculate(item.Location.Longitude, suggestedUser.Location.Longitude, item.Location.Latitude, suggestedUser.Location.Latitude);
+                        if (distance >= mainPreferenceResponse.Distance + 1) { continue; } //contemplar una tolerancia de +- 1km
+
+                        if (!mainPreferenceResponse.GendersPreferencesId.Contains(suggestedGender) && mainPreferenceResponse.GendersPreferencesId.Count > 0) { continue; } // Si no es del genero en preferencia y si tiene preferencias de genero, saltea
+                        if (suggestedAge < mainPreferenceResponse.SinceAge || suggestedAge > mainPreferenceResponse.UntilAge) { continue; } //Si no esta dentro de la edad preferida, saltea
+                        var suggestedInterest = suggestedPreference.OwnInterestPreferencesId;
+                        var mainInterest = mainPreferenceResponse.InterestPreferencesId;
+
+                        bool flagFoundSuggested = false; //Flag para cortar el bucle de busqueda de mainInterest
+                                                         // Recorre todos los intereses y si coincide alguno, lo toma como sugerencia
+                        foreach (int main in mainInterest)
+                        {
+                            if (flagFoundSuggested || suggestedInterest.Count.Equals(0)) { break; }
+                            foreach (int sugg in suggestedInterest)
+                            {
+                                if (sugg.Equals(main))
+                                {
+                                    Suggestion suggestion = new Suggestion()
+                                    {
+                                        MainUser = mainUserId,
+                                        SuggestedUser = suggestedUser.UserId,
+                                        DateView = null,
+                                        View = false
+                                    };
+                                    await _suggestionCommand.InsertSuggestion(suggestion);
+                                    flagFoundSuggested = true;
+                                    break;
+                                }
+                            }
+                        }
+
+
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                _message = e.Message;
+            }
+        }
+
+        //Usuarios nuevos no calculados por el worker
+        public async Task<List<int>> UsersNew() 
+        {
+            try
+            {
+                var responseUser = await _userApiServices.GetAllUsersObj();
+                var count = await _suggestionQueries.CountSuggestionsUsers();
+                var usersNew = new List<int>();
+                foreach(var user in responseUser)
+                {
+                    var suggestedExist = count.Select(u => u.MainUser).Contains(user.UserId);
+                    if (!suggestedExist) // Si el usuario de la Lista de Usuarios no tiene alguna sugerencia calculada, se considera nuevo
+                    {
+                        usersNew.Add(user.UserId);
+                    }
+                }
+
+                return usersNew;
+            }
+            catch(Exception e)
+            {
+                _message = e.Message;
+                return new List<int>();
+            }
+        }
+
+        public async Task<List<int>> CountSuggestionsUsers(int valueRecalculate)
+        {
+            try 
+            { 
+                var count = await _suggestionQueries.CountSuggestionsUsers();
+                var listRecalculate = count.Where(w => w.CountSuggestions <= valueRecalculate).Select(x => x.MainUser).ToList();
+
+                return listRecalculate;
+            }
+            catch (Exception e)
+            {
+                _message = e.Message;
+                return new List<int>();
             }
         }
         
