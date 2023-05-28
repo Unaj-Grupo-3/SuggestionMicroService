@@ -91,12 +91,16 @@ namespace Application.UseCases
 
                     var PreferenceByUserId = preferenceList.FirstOrDefault(x => x.UserId == userList[i].UserId);
 
-                    foreach (var category in PreferenceByUserId.CategoryPreferences)
+                    if (PreferenceByUserId!=null)
                     {
-                        category.InterestPreferencesId = category.InterestPreferencesId.Where(x => x.OwnInterest).ToList();
-                    }
+                        foreach (var category in PreferenceByUserId.CategoryPreferences)
+                        {
+                            category.InterestPreferencesId = category.InterestPreferencesId.Where(x => x.OwnInterest).ToList();
+                        }
+                        PreferenceByUserId.CategoryPreferences = PreferenceByUserId.CategoryPreferences.Where(x => x.InterestPreferencesId.Count > 0).ToList();
 
-                    userSuggestedRespose.OurPreferences.OwnCategoryPreferences = PreferenceByUserId.CategoryPreferences;
+                        userSuggestedRespose.OurPreferences.OwnCategoryPreferences = PreferenceByUserId.CategoryPreferences;
+                    }
 
                     //var intereses = PreferenceByUserId.CategoryPreferences.SelectMany(c => c.InterestPreferencesId)
                     //        .Where(x => x.OwnInterest == true).ToList();

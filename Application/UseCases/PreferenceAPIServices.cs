@@ -23,13 +23,14 @@ namespace Application.UseCases
             _url = "https://localhost:7175/api/v1/UserPreferences";
             _httpClient = httpClient;
             _apiKey = configuration["ApiKey"];
+            _httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
         }
 
         public async Task<JsonDocument> GetAllPreference()
         {
             try
             {
-                _httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
+                //_httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
                 var response = await _httpClient.GetAsync(_url);
                 if (response.IsSuccessStatusCode)
                 {
@@ -53,7 +54,7 @@ namespace Application.UseCases
         {
             try
             {
-                _httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
+                //_httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
                 var response = await _httpClient.GetAsync(_url);
                 if (response.IsSuccessStatusCode)
                 {
@@ -120,7 +121,7 @@ namespace Application.UseCases
                 {
                     paramRequest = paramRequest + string.Format("userIds={0}&", preferenceIds[i]);
                 }
-                _httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
+                //_httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
                 var response = await _httpClient.GetAsync(_url + "/Ids?" + paramRequest + "fullResponse=true");
 
                 if (response.IsSuccessStatusCode)

@@ -19,6 +19,7 @@ namespace Application.UseCases
             _url = "https://localhost:7199/api/v1/Match";
             _httpClient = httpClient;
             _apiKey = configuration["ApiKey"];
+            _httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
         }
 
         public Task<bool> GetAllMatches()

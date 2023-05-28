@@ -21,13 +21,14 @@ namespace Application.UseCases
             _url = "https://localhost:7020/api/v1/User";
             _httpClient = httpClient;
             _apiKey = configuration["ApiKey"];
+            _httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
         }
 
         public async Task<JsonDocument> GetAllUsers()
         {
             try
             {
-                _httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
+                //_httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
                 var response = await _httpClient.GetAsync(_url);
                 if(response.IsSuccessStatusCode)
                 {
@@ -51,7 +52,7 @@ namespace Application.UseCases
         {
             try
             {
-                _httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
+                //_httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
                 var response = await _httpClient.GetAsync(_url);
                 if (response.IsSuccessStatusCode)
                 {
@@ -121,7 +122,7 @@ namespace Application.UseCases
                     paramRequest = paramRequest + string.Format("usersId={0}&", userIds[i]);
                 }
 
-                _httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
+                //_httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
                 var response = await _httpClient.GetAsync(_url + "/true?" + paramRequest);
 
                 if (response != null && response.IsSuccessStatusCode)
