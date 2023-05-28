@@ -7,7 +7,7 @@ namespace Application.Interfaces
     {
         Task<IList<Suggestion>> GetAllSuggestions();
         Task<IList<Suggestion>> GetSuggestionsByUserId(int userId);
-
+        Task<List<(int MainUser, int CountSuggestions)>> CountSuggestionsUsers();
 
     }
 }

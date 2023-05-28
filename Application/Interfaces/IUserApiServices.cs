@@ -9,7 +9,6 @@ namespace Application.Interfaces
     {
         Task<JsonDocument> GetAllUsers();
         Task<List<UserResponse>> GetAllUsersObj();
-
         Task<List<UserResponse>?> GetUsersByList(List<int> userIds);
 
         string GetMessage();

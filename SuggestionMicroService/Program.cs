@@ -83,6 +83,7 @@ builder.Services.AddSingleton<ISuggestionQueries, SuggestionQueries>();
 builder.Services.AddSingleton<ISuggestionCommands, SuggestionCommands>();
 builder.Services.AddSingleton<ISuggestionServices, SuggestionServices>();
 builder.Services.AddSingleton<ITokenServices, TokenServices>();
+builder.Services.AddSingleton<IUserMatchApiServices, UserMatchApiServices>();
 builder.Services.AddSingleton<ISuggestionWorkerServices, SuggestionWorkerServices>();
 
 builder.Services.AddHttpClient<IUserApiServices, UserApiServices>();
@@ -92,7 +93,7 @@ builder.Services.AddHttpClient<IPreferenceApiServices, PreferenceApiServices>();
 builder.Services.AddHttpClient<IMatchApiServices, MatchApiServices>();
 
 
-// builder.Services.AddHostedService<Worker>();
+builder.Services.AddHostedService<Worker>();
 
 var app = builder.Build();
 
