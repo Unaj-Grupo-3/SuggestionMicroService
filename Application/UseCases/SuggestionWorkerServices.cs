@@ -11,17 +11,19 @@ namespace Application.UseCases
     {
         private readonly IPreferenceApiServices _preferenceApiServices;
         private readonly IUserApiServices _userApiServices;
+        private readonly IUserMatchApiServices _userMatchApiServices;
         private readonly ISuggestionCommands _suggestionCommand;
         private readonly ISuggestionQueries _suggestionQueries;
         private string? _message;
         private int _statusCode;
 
-        public SuggestionWorkerServices(IUserApiServices userApiServices, IPreferenceApiServices preferenceApiServices, ISuggestionCommands suggestionCommand, ISuggestionQueries suggestionQueries)
+        public SuggestionWorkerServices(IUserApiServices userApiServices, IPreferenceApiServices preferenceApiServices, ISuggestionCommands suggestionCommand, ISuggestionQueries suggestionQueries, IUserMatchApiServices userMatchApiServices)
         {
             _preferenceApiServices = preferenceApiServices;
             _userApiServices = userApiServices;
             _suggestionCommand = suggestionCommand;
             _suggestionQueries = suggestionQueries;
+            _userMatchApiServices = userMatchApiServices;
         }
         public SuggestionWorkerServices() { }
 
@@ -29,21 +31,29 @@ namespace Application.UseCases
         {
             try
             {
+                await _suggestionCommand.DeleteWorkerSuggByUserId(userId); // borra todas las sugerencias por ID 
                 var responseUser = await _userApiServices.GetAllUsersObj();
                 var responsePreference = await _preferenceApiServices.GetAllPreferenceObj();
+                var responseUserMatch = await _userMatchApiServices.GetAllMatches();
 
                 var mainUser = responseUser.FirstOrDefault(x => x.UserId == userId); // Response de usuario
                 var mainPreference = responsePreference.FirstOrDefault(x => x.UserId == userId); // Response de preferencias de usuario
                 var mainAge = DateTime.Today.AddTicks(-mainUser.Birthday.Ticks).Year - 1; // Edad del main User
                 var mainGender = mainUser.Gender.GenderId; // Genero del main User
                 var suggestionsUser = await _suggestionQueries.GetSuggestionsByUserId(userId); // Sugerencias ya calculadas del usuario
+                var lsUser1Match = responseUserMatch.Where(x => x.User1 == userId).ToList();// lista de matches del usuario param
 
                 foreach (var item in responseUser)
                 {
                     var suggestedUser = responseUser.FirstOrDefault(x => x.UserId == item.UserId);
                     if (suggestedUser.UserId == userId) { continue; } // No calculamos a la misma persona parametrizada
                     if (suggestionsUser.Select(x => x.SuggestedUser).ToList().Contains(item.UserId)) { continue; } // Si ya tiene al usuario calculado, lo ignora
-                    if (mainPreference == null)
+                    
+
+                    if (lsUser1Match.Exists(x=> x.User2 == item.UserId && (x.LikeUser1 == 1 || x.LikeUser2 == -1))) { continue; } // Si el usuario sugerido esta en la lista de likes del usuario param, lo ignora
+                    if (lsUser1Match.Exists(x => x.User2 == item.UserId && x.LikeUser1 == -1 )) { continue; } // Si el usuario sugerido esta en la lista de DontLikes del usuario param, lo ignora
+
+                    if (mainPreference == null) // Si el usuario no tiene preferencias, se le calcula una sugerencia igual
                     {
                         Suggestion suggestion = new Suggestion()
                         {

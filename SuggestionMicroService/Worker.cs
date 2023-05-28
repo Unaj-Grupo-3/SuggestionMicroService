@@ -37,9 +37,8 @@ namespace SuggestionMicroService
                         await _suggestionWorkerServices.GenerateSuggestionXUser(user);
                     }
 
-                    //await _suggestionWorkerServices.GenerateSuggestionAll();
                     // Ejecuta cada 5 minutos.
-                    await Task.Delay(60000 * 5, stoppingToken);
+                    await Task.Delay(60000 * 2, stoppingToken);
                 }
             }
             catch(Exception e)
