@@ -37,6 +37,12 @@ namespace Infrastructure.Commands
             return true;
         }
 
+        public async Task<bool> DeleteWorkerSuggByUserIdAndUserSuggested(int userId, int userSuggested)
+        {
+            _context.Suggestions.Where(x => x.MainUser == userId && x.SuggestedUser == userSuggested).ExecuteDelete();
+            return true;
+        }
+
         public async Task<Suggestion> InsertSuggestion(Suggestion suggestion)
         {
             _context.Add(suggestion);
