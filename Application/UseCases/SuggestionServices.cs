@@ -26,8 +26,6 @@ namespace Application.UseCases
             return sugg;
         }
 
-
-
         public async Task<SuggestionResponse> GetSuggestionsByUserId(int userIds)
         {
             SuggestionResponse response = new();
@@ -129,6 +127,12 @@ namespace Application.UseCases
             }
 
             return response;
+        }
+
+        public async Task<bool> DeleteWorkerSuggByUserIdAndUserSuggested(int userId, int userSuggested)
+        {
+            await _commands.DeleteWorkerSuggByUserIdAndUserSuggested(userId, userSuggested);
+            return true;
         }
     }
 }

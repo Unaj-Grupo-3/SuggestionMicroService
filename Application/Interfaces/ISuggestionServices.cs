@@ -9,6 +9,7 @@ namespace Application.Interfaces
         public Task<IList<Suggestion>> GetAll();
         //Task<IList<SuggestionResponse>> GetSuggestionsByUserId(int userId);
         public Task<SuggestionResponse> GetSuggestionsByUserId(int userIds);
+        public Task<bool> DeleteWorkerSuggByUserIdAndUserSuggested(int userId, int userSuggested);
 
     }
 }

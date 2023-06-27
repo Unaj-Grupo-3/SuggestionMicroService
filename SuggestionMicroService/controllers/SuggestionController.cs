@@ -57,5 +57,23 @@ namespace SuggestionMicroService.Controllers
                 return new JsonResult(new { ex.Message }) { StatusCode = 500 };
             }
         }
+
+        [HttpDelete]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> DeleteByUserAndSuggested(int userSuggested)
+        {
+            try
+            {
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                int userId = _tokenServices.GetUserId(identity);
+
+                bool response = await _suggestionServices.DeleteWorkerSuggByUserIdAndUserSuggested(userId, userSuggested);
+                return new JsonResult(new { Message = "Se ha eliminado la sugerencia", Response = response }) { StatusCode = 200 };
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { ex.Message }) { StatusCode = 500 };
+            }
+        }
     }
 }

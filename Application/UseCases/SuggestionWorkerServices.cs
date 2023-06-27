@@ -41,17 +41,18 @@ namespace Application.UseCases
                 var mainAge = DateTime.Today.AddTicks(-mainUser.Birthday.Ticks).Year - 1; // Edad del main User
                 var mainGender = mainUser.Gender.GenderId; // Genero del main User
                 var suggestionsUser = await _suggestionQueries.GetSuggestionsByUserId(userId); // Sugerencias ya calculadas del usuario
-                var lsUser1Match = responseUserMatch.Where(x => x.User1 == userId).ToList();// lista de matches del usuario param
+                var lsUser1Match = responseUserMatch.Where(x => x.User1 == userId || x.User2 == userId).ToList();// lista de matches del usuario param
 
                 foreach (var item in responseUser)
                 {
                     var suggestedUser = responseUser.FirstOrDefault(x => x.UserId == item.UserId);
                     if (suggestedUser.UserId == userId) { continue; } // No calculamos a la misma persona parametrizada
-                    if (suggestionsUser.Select(x => x.SuggestedUser).ToList().Contains(item.UserId)) { continue; } // Si ya tiene al usuario calculado, lo ignora
-                    
+                    if (suggestionsUser.Select(x => x.SuggestedUser).ToList().Contains(item.UserId)) { continue; } // Si ya tiene al usuario calculado, lo ignora                    
 
-                    if (lsUser1Match.Exists(x=> x.User2 == item.UserId && (x.LikeUser1 == 1 || x.LikeUser2 == -1))) { continue; } // Si el usuario sugerido esta en la lista de likes del usuario param, lo ignora
-                    if (lsUser1Match.Exists(x => x.User2 == item.UserId && x.LikeUser1 == -1 )) { continue; } // Si el usuario sugerido esta en la lista de DontLikes del usuario param, lo ignora
+                    if (lsUser1Match.Exists(x => (x.User1 == item.UserId && x.LikeUser2 != 0) || (x.User2 == item.UserId && x.LikeUser1 != 0) )) { continue; } // Si el usuario param ya dio like o dislike al usuario, lo ignora
+                    //if (lsUser1Match.Exists(x=> x.User2 == item.UserId && (x.LikeUser1 == 1 || x.LikeUser2 == -1))) { continue; } // Si el usuario sugerido esta en la lista de likes del usuario param, lo ignora
+                    //if (lsUser1Match.Exists(x => x.User2 == item.UserId && x.LikeUser1 == -1)) { continue; } // Si el usuario sugerido esta en la lista de DontLikes del usuario param, lo ignora
+
 
                     if (mainPreference == null) // Si el usuario no tiene preferencias, se le calcula una sugerencia igual
                     {
