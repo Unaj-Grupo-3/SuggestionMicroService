@@ -60,14 +60,14 @@ namespace SuggestionMicroService.Controllers
 
         [HttpDelete]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> DeleteByUserAndSuggested(int userSuggested)
+        public async Task<IActionResult> DeleteByUserAndSuggested(SuggestionRequest request)
         {
             try
             {
                 var identity = HttpContext.User.Identity as ClaimsIdentity;
                 int userId = _tokenServices.GetUserId(identity);
 
-                bool response = await _suggestionServices.DeleteWorkerSuggByUserIdAndUserSuggested(userId, userSuggested);
+                bool response = await _suggestionServices.DeleteWorkerSuggByUserIdAndUserSuggested(userId, request.UserId);
                 return new JsonResult(new { Message = "Se ha eliminado la sugerencia", Response = response }) { StatusCode = 200 };
             }
             catch (Exception ex)
