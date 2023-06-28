@@ -50,20 +50,10 @@ namespace Application.UseCases
                     if (suggestionsUser.Select(x => x.SuggestedUser).ToList().Contains(item.UserId)) { continue; } // Si ya tiene al usuario calculado, lo ignora                    
 
                     if (lsUser1Match.Exists(x => (x.User1 == item.UserId && x.LikeUser2 != 0) || (x.User2 == item.UserId && x.LikeUser1 != 0) )) { continue; } // Si el usuario param ya dio like o dislike al usuario, lo ignora
-                    //if (lsUser1Match.Exists(x=> x.User2 == item.UserId && (x.LikeUser1 == 1 || x.LikeUser2 == -1))) { continue; } // Si el usuario sugerido esta en la lista de likes del usuario param, lo ignora
-                    //if (lsUser1Match.Exists(x => x.User2 == item.UserId && x.LikeUser1 == -1)) { continue; } // Si el usuario sugerido esta en la lista de DontLikes del usuario param, lo ignora
-
-
+                    
                     if (mainPreference == null) // Si el usuario no tiene preferencias, se le calcula una sugerencia igual
-                    {
-                        Suggestion suggestion = new Suggestion()
-                        {
-                            MainUser = mainUser.UserId,
-                            SuggestedUser = suggestedUser.UserId,
-                            DateView = null,
-                            View = false
-                        };
-                        await _suggestionCommand.InsertSuggestion(suggestion);
+                    {                 
+                        await InsertSuggestionDefault(mainUser.UserId, suggestedUser.UserId);
                         continue;
                     }
                     // Calcular distancia
@@ -82,6 +72,12 @@ namespace Application.UseCases
                     var suggestedInterest = suggestedPreference.OwnInterestPreferencesId; // Intereses del sugerido
                     var mainInterest = mainPreference.InterestPreferencesId; // Intereses del Main User
 
+                    if (mainPreference.InterestPreferencesId.Count.Equals(0))
+                    {
+                        await InsertSuggestionDefault(mainUser.UserId, suggestedUser.UserId);
+                        continue;
+                    }
+
                     bool flagFoundSuggested = false; //Flag para cortar el bucle de busqueda de mainInterest
                                                      // Recorre todos los intereses y si coincide alguno, lo toma como sugerencia
                     foreach (int main in mainInterest)
@@ -91,14 +87,7 @@ namespace Application.UseCases
                         {
                             if (sugg.Equals(main))
                             {
-                                Suggestion suggestion = new Suggestion()
-                                {
-                                    MainUser = mainUser.UserId,
-                                    SuggestedUser = suggestedUser.UserId,
-                                    DateView = null,
-                                    View = false
-                                };
-                                await _suggestionCommand.InsertSuggestion(suggestion);
+                                await InsertSuggestionDefault(mainUser.UserId, suggestedUser.UserId);
                                 flagFoundSuggested = true;
                                 break;
                             }
@@ -111,8 +100,18 @@ namespace Application.UseCases
             {
                 _message = e.Message;
             }
+        }
 
-
+        public async Task InsertSuggestionDefault(int UserId, int SuggestedUserId)
+        {
+            Suggestion suggestion = new Suggestion()
+            {
+                MainUser = UserId,
+                SuggestedUser = SuggestedUserId,
+                DateView = null,
+                View = false
+            };
+            await _suggestionCommand.InsertSuggestion(suggestion);
         }
 
         public async Task GenerateSuggestionAll()
@@ -235,6 +234,17 @@ namespace Application.UseCases
                 return new List<int>();
             }
         }
-        
+
+        public async Task DeleteSuggestionsAll()
+        {
+            try
+            {
+                await _suggestionCommand.DeleteSuggestionAll();
+            }
+            catch (Exception e)
+            {
+                _message = e.Message;
+            }
+        }
     }
 }

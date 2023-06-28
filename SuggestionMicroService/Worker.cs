@@ -22,7 +22,7 @@ namespace SuggestionMicroService
                 while (!stoppingToken.IsCancellationRequested)
                 {
                     _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-
+                    await _suggestionWorkerServices.DeleteSuggestionsAll();
                     // Calcula nuevas sugerencias cuando la cantidad de sugerencias calculada baja del numero informado por parametros:
                     var countUsers = await _suggestionWorkerServices.CountSuggestionsUsers(5);
                     foreach (var user in countUsers)
