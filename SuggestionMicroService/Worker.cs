@@ -25,13 +25,14 @@ namespace SuggestionMicroService
                     _logger.LogInformation("Worker running at: {time}", init);
                     //await _suggestionWorkerServices.DeleteSuggestionsAll();
                     // Calcula nuevas sugerencias cuando la cantidad de sugerencias calculada baja del numero informado por parametros:
+
                     var countUsers = await _suggestionWorkerServices.CountSuggestionsUsers(5);
                     foreach (var user in countUsers)
                     {
                         await _suggestionWorkerServices.GenerateSuggestionXUser(user);
                     }
 
-                    // Calcula sugerencias para los usuarios nuevos:
+                    //// Calcula sugerencias para los usuarios nuevos:
                     var usersNew = await _suggestionWorkerServices.UsersNew();
                     foreach (var user in usersNew)
                     {

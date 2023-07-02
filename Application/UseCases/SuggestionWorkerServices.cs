@@ -44,14 +44,15 @@ namespace Application.UseCases
                 var lsUser1Match = responseUserMatch.Where(x => x.User1 == userId || x.User2 == userId).ToList();// lista de matches del usuario param
 
                 var usersFiltred = new List<int>();
+                var genderPreference = new List<int>() { -1 };
+
 
                 if (mainPreference == null)
                 {
                     var edad = mainAge;
-                    var minEdad = mainAge - 5 < 18 ? 18 : mainAge - 5;
-                    var maxEdad = mainAge + 5;
-                    var distance = 10;
-                    var genderPreference = new List<int>() { -1 };
+                    var minEdad = mainAge - 10 < 18 ? 18 : mainAge - 10;
+                    var maxEdad = mainAge + 10;
+                    var distance = 15;
                     usersFiltred = await _userApiServices.GetAllUsersIdsByFilters(genderPreference,
                                                                                   minEdad,
                                                                                   maxEdad,
@@ -61,7 +62,7 @@ namespace Application.UseCases
                 }
                 else
                 {
-                    usersFiltred = await _userApiServices.GetAllUsersIdsByFilters(mainPreference.GendersPreferencesId, 
+                    usersFiltred = await _userApiServices.GetAllUsersIdsByFilters(mainPreference.GendersPreferencesId.Count == 0? genderPreference : mainPreference.GendersPreferencesId , 
                                                                                   mainPreference.SinceAge, 
                                                                                   mainPreference.UntilAge, 
                                                                                   mainPreference.Distance ,
@@ -76,7 +77,11 @@ namespace Application.UseCases
 
                     if (suggestionsUser.Select(x => x.SuggestedUser).ToList().Contains(suggId)) { continue; } // Si ya tiene al usuario calculado, lo ignora                    
 
-                    if (lsUser1Match.Exists(x => (x.User1 == suggId && x.LikeUser1 != 0) || (x.User2 == suggId && x.LikeUser2 != 0))) { continue; } // Si el usuario param ya dio like o dislike al usuario, lo ignora
+
+                    var checkLike1 = lsUser1Match.FirstOrDefault( x => x.User2 == suggId && x.LikeUser1 != 0);
+                    var checkLike2 = lsUser1Match.FirstOrDefault( x => x.User1 == suggId && x.LikeUser2 != 0);
+
+                    if (checkLike1 != null || checkLike2 != null) { continue; } // Si el usuario param ya dio like o dislike al usuario, lo ignora
 
                     if (mainPreference == null) // Si el usuario no tiene preferencias, se le calcula una sugerencia igual
                     {

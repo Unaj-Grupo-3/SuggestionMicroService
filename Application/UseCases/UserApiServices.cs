@@ -219,6 +219,11 @@ namespace Application.UseCases
                     var listResponse = new List<int>();
                     var list = JArray.Parse(jsonResult.Result);
 
+                    foreach( var id in list)
+                    {
+                        listResponse.Add((int)id);
+                    }
+                     
                     return listResponse;
                 }
                 _message = "No se ha podido obtener el documento mediante la peticion.";
