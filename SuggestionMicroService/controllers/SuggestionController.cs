@@ -15,6 +15,7 @@ namespace SuggestionMicroService.Controllers
     public class SuggestionController : ControllerBase
     {
         private readonly ISuggestionServices _suggestionServices;
+        private readonly ISuggestionWorkerServices _suggestionWorkerServices;
         private readonly ITokenServices _tokenServices;
 
         public SuggestionController(ISuggestionServices suggestionServices, ITokenServices tokenServices)
@@ -64,10 +65,19 @@ namespace SuggestionMicroService.Controllers
         {
             try
             {
+                bool response = false;
                 var identity = HttpContext.User.Identity as ClaimsIdentity;
                 int userId = _tokenServices.GetUserId(identity);
 
-                bool response = await _suggestionServices.DeleteWorkerSuggByUserIdAndUserSuggested(userId, request.UserId);
+                if(request.UserId > 0)
+                {
+                    response = await _suggestionServices.DeleteWorkerSuggByUserIdAndUserSuggested(userId, request.UserId);
+                }
+                else
+                {
+                    response = await _suggestionWorkerServices.DeleteSuggestionsById(userId);
+                }
+
                 return new JsonResult(new { Message = "Se ha eliminado la sugerencia", Response = response }) { StatusCode = 200 };
             }
             catch (Exception ex)
