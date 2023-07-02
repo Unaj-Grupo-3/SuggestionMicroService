@@ -18,10 +18,11 @@ namespace SuggestionMicroService.Controllers
         private readonly ISuggestionWorkerServices _suggestionWorkerServices;
         private readonly ITokenServices _tokenServices;
 
-        public SuggestionController(ISuggestionServices suggestionServices, ITokenServices tokenServices)
+        public SuggestionController(ISuggestionServices suggestionServices, ITokenServices tokenServices, ISuggestionWorkerServices suggestionWorkerServices)
         {
             _suggestionServices = suggestionServices;
             _tokenServices = tokenServices;
+            _suggestionWorkerServices = suggestionWorkerServices;
         }
 
         [HttpGet]
