@@ -9,6 +9,7 @@ namespace Application.Interfaces
     {
         Task<JsonDocument> GetAllUsers();
         Task<List<UserResponse>> GetAllUsersObj();
+        Task<List<int>> GetAllUsersIdsByFilters(List<int> gendersId, int minAge, int maxAge, int distance, double longitude, double latitude);
         Task<List<UserResponse>?> GetUsersByList(List<int> userIds);
 
         string GetMessage();

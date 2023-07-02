@@ -21,7 +21,8 @@ namespace SuggestionMicroService
             {
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                    DateTimeOffset init = DateTimeOffset.Now;
+                    _logger.LogInformation("Worker running at: {time}", init);
                     //await _suggestionWorkerServices.DeleteSuggestionsAll();
                     // Calcula nuevas sugerencias cuando la cantidad de sugerencias calculada baja del numero informado por parametros:
                     var countUsers = await _suggestionWorkerServices.CountSuggestionsUsers(5);
@@ -36,7 +37,12 @@ namespace SuggestionMicroService
                     {
                         await _suggestionWorkerServices.GenerateSuggestionXUser(user);
                     }
-                    _logger.LogInformation("Worker ending at: {time}", DateTimeOffset.Now);
+                    DateTimeOffset end = DateTimeOffset.Now;
+                    _logger.LogInformation("Worker ending at: {time}", end);
+
+                    Console.WriteLine("************************************************************************************************************************");
+                    Console.WriteLine(init - end);
+                    Console.WriteLine("************************************************************************************************************************");
                     // Ejecuta cada 2 minutos.
                     await Task.Delay(60000 * 1, stoppingToken);
                 }

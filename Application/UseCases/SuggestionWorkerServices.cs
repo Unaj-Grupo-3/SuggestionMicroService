@@ -43,29 +43,48 @@ namespace Application.UseCases
                 var suggestionsUser = await _suggestionQueries.GetSuggestionsByUserId(userId); // Sugerencias ya calculadas del usuario
                 var lsUser1Match = responseUserMatch.Where(x => x.User1 == userId || x.User2 == userId).ToList();// lista de matches del usuario param
 
-                foreach (var item in responseUser)
-                {
-                    var suggestedUser = responseUser.FirstOrDefault(x => x.UserId == item.UserId);
-                    if (suggestedUser.UserId == userId) { continue; } // No calculamos a la misma persona parametrizada
-                    if (suggestionsUser.Select(x => x.SuggestedUser).ToList().Contains(item.UserId)) { continue; } // Si ya tiene al usuario calculado, lo ignora                    
+                var usersFiltred = new List<int>();
 
-                    if (lsUser1Match.Exists(x => (x.User1 == item.UserId && x.LikeUser2 != 0) || (x.User2 == item.UserId && x.LikeUser1 != 0) )) { continue; } // Si el usuario param ya dio like o dislike al usuario, lo ignora
-                    
+                if (mainPreference == null)
+                {
+                    var edad = mainAge;
+                    var minEdad = mainAge - 5 < 18 ? 18 : mainAge - 5;
+                    var maxEdad = mainAge + 5;
+                    var distance = 10;
+                    var genderPreference = new List<int>() { -1 };
+                    usersFiltred = await _userApiServices.GetAllUsersIdsByFilters(genderPreference,
+                                                                                  minEdad,
+                                                                                  maxEdad,
+                                                                                  distance,
+                                                                                  mainUser.Location.Longitude,
+                                                                                  mainUser.Location.Latitude);
+                }
+                else
+                {
+                    usersFiltred = await _userApiServices.GetAllUsersIdsByFilters(mainPreference.GendersPreferencesId, 
+                                                                                  mainPreference.SinceAge, 
+                                                                                  mainPreference.UntilAge, 
+                                                                                  mainPreference.Distance ,
+                                                                                  mainUser.Location.Longitude, 
+                                                                                  mainUser.Location.Latitude);
+                }
+                
+                foreach (var suggId in usersFiltred)
+                {
+
+                    if (suggId == userId) { continue; } // No calculamos a la misma persona parametrizada
+
+                    if (suggestionsUser.Select(x => x.SuggestedUser).ToList().Contains(suggId)) { continue; } // Si ya tiene al usuario calculado, lo ignora                    
+
+                    if (lsUser1Match.Exists(x => (x.User1 == suggId && x.LikeUser1 != 0) || (x.User2 == suggId && x.LikeUser2 != 0))) { continue; } // Si el usuario param ya dio like o dislike al usuario, lo ignora
+
                     if (mainPreference == null) // Si el usuario no tiene preferencias, se le calcula una sugerencia igual
-                    {                 
-                        await InsertSuggestionDefault(mainUser.UserId, suggestedUser.UserId);
+                    {
+                        await InsertSuggestionDefault(mainUser.UserId, suggId);
                         continue;
                     }
-                    // Calcular distancia
-                    var distance = CalculateDistance.Calculate(mainUser.Location.Longitude, item.Location.Longitude, mainUser.Location.Latitude, item.Location.Latitude);
-                    if (distance >= mainPreference.Distance + 1) { continue; } //contemplar una tolerancia de +- 1km
 
-                    var suggestedAge = DateTime.Today.AddTicks(-item.Birthday.Ticks).Year - 1; // Edad del Suggested User
-                    var suggestedGender = item.Gender.GenderId; // Genero del Suggested User
-
-                    if (!mainPreference.GendersPreferencesId.Contains(suggestedGender) && mainPreference.GendersPreferencesId.Count > 0) { continue; } // Si no es del genero en preferencia y si tiene preferencias de genero, saltea
-                    if (suggestedAge < mainPreference.SinceAge || suggestedAge > mainPreference.UntilAge) { continue; } //Si no esta dentro de la edad preferida, saltea
-                    var suggestedPreference = responsePreference.FirstOrDefault(x => x.UserId == item.UserId);
+                    var suggestedPreference = responsePreference.FirstOrDefault(x => x.UserId == suggId);
 
                     if (suggestedPreference == null) { continue; }
 
@@ -74,7 +93,7 @@ namespace Application.UseCases
 
                     if (mainPreference.InterestPreferencesId.Count.Equals(0))
                     {
-                        await InsertSuggestionDefault(mainUser.UserId, suggestedUser.UserId);
+                        await InsertSuggestionDefault(mainUser.UserId, suggId);
                         continue;
                     }
 
@@ -87,13 +106,12 @@ namespace Application.UseCases
                         {
                             if (sugg.Equals(main))
                             {
-                                await InsertSuggestionDefault(mainUser.UserId, suggestedUser.UserId);
+                                await InsertSuggestionDefault(mainUser.UserId, suggId);
                                 flagFoundSuggested = true;
                                 break;
                             }
                         }
                     }
-
                 }
             }
             catch(Exception e)

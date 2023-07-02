@@ -2,6 +2,7 @@
 using Application.Models;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 using System.Text.Json;
 
 
@@ -197,6 +198,39 @@ namespace Application.UseCases
             }
         }
 
+        public async Task<List<int>> GetAllUsersIdsByFilters(List<int> gendersId, int minAge, int maxAge, int distance, double longitude, double latitude)
+        {
+            try
+            {
+                var filterUrl = "";
+
+                for (int i = 0;  i < gendersId.Count; i++)
+                {
+                    filterUrl += i > 0 ? $"&GendersId={gendersId[i]}" : $"?GendersId={gendersId[i]}";
+                }
+
+                filterUrl += $"&Latitude={latitude.ToString().Replace(",",".")}&Longitude={longitude.ToString().Replace(",", ".")}&Distance={distance}&MinEdad={minAge}&MaxEdad={maxAge}";
+
+                //_httpClient.DefaultRequestHeaders.Add("X-API-KEY", _apiKey);
+                var response = await _httpClient.GetAsync(_url + filterUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonResult = response.Content.ReadAsStringAsync();
+                    var listResponse = new List<int>();
+                    var list = JArray.Parse(jsonResult.Result);
+
+                    return listResponse;
+                }
+                _message = "No se ha podido obtener el documento mediante la peticion.";
+                _statusCode = 404;
+                return new List<int>();
+            }
+            catch (Exception e)
+            {
+                _message = e.Message;
+                return new List<int>();
+            }
+        }
         public string GetMessage()
         {
             return _message;
@@ -216,5 +250,6 @@ namespace Application.UseCases
         {
             return _statusCode;
         }
+
     }
 }
