@@ -31,7 +31,7 @@ namespace Application.UseCases
         {
             try
             {
-                await _suggestionCommand.DeleteWorkerSuggByUserId(userId); // borra todas las sugerencias por ID 
+                //await _suggestionCommand.DeleteWorkerSuggByUserId(userId); // borra todas las sugerencias por ID 
                 var responseUser = await _userApiServices.GetAllUsersObj();
                 var responsePreference = await _preferenceApiServices.GetAllPreferenceObj();
                 var responseUserMatch = await _userMatchApiServices.GetAllMatches();
@@ -244,6 +244,22 @@ namespace Application.UseCases
             catch (Exception e)
             {
                 _message = e.Message;
+            }
+        }
+
+
+        public async Task<bool> DeleteSuggestionsById(int userId)
+        {
+            try
+            {
+                await _suggestionCommand.DeleteWorkerSuggByUserId(userId);
+                await GenerateSuggestionXUser(userId);
+                return true;
+            }
+            catch (Exception e)
+            {
+                _message = e.Message;
+                return false;
             }
         }
     }
