@@ -96,7 +96,7 @@ namespace Application.UseCases
                     var suggestedInterest = suggestedPreference.OwnInterestPreferencesId; // Intereses del sugerido
                     var mainInterest = mainPreference.InterestPreferencesId; // Intereses del Main User
 
-                    if (mainPreference.InterestPreferencesId.Count.Equals(0))
+                    if (mainPreference.InterestPreferencesId.Count.Equals(0) || mainPreference.InterestPreferencesId.Count < 10)
                     {
                         await InsertSuggestionDefault(mainUser.UserId, suggId);
                         continue;
