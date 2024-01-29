@@ -4,7 +4,6 @@ using Application.Interfaces;
 using Domain.Entities;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Infrastructure.Commands
 {

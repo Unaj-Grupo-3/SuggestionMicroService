@@ -1,6 +1,4 @@
 using Application.Interfaces;
-using Application.UseCases;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace SuggestionMicroService
 {
@@ -23,7 +21,7 @@ namespace SuggestionMicroService
                 {
                     DateTimeOffset init = DateTimeOffset.Now;
                     _logger.LogInformation("Worker running at: {time}", init);
-                    //await _suggestionWorkerServices.DeleteSuggestionsAll();
+                    
                     // Calcula nuevas sugerencias cuando la cantidad de sugerencias calculada baja del numero informado por parametros:
 
                     var countUsers = await _suggestionWorkerServices.CountSuggestionsUsers(5);

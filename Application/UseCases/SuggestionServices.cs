@@ -52,7 +52,6 @@ namespace Application.UseCases
             preferenceList = await _preferenceApiServices.GetPreferencesByList(ids);
 
             //Response
-            //IList<SuggestedUser> suggestedUsers = new List<SuggestedUser>();
             IList<UserSuggestedRespose> suggestedUsers = new List<UserSuggestedRespose>();
             IList<UserPreferencesResponse> suggestedPreference = new List<UserPreferencesResponse>();
 
@@ -99,23 +98,6 @@ namespace Application.UseCases
 
                         userSuggestedRespose.OurPreferences.OwnCategoryPreferences = PreferenceByUserId.CategoryPreferences;
                     }
-
-                    //var intereses = PreferenceByUserId.CategoryPreferences.SelectMany(c => c.InterestPreferencesId)
-                    //        .Where(x => x.OwnInterest == true).ToList();
-
-
-
-                    //userSuggestedRespose.OurPreferences.OwnCategoryPreferences = intereses;
-
-                    //SuggestedUser suggestedUser = new SuggestedUser
-                    //{
-                    //    Id = suggestions[i].Id,
-                    //    User = userList.FirstOrDefault(x => x.UserId == suggestions[i].SuggestedUser),
-                    //    DateView = suggestions[i].DateView,
-                    //    View = suggestions[i].View,
-                    //    Distance = distance,
-                    //    Preferences = null
-                    //};
 
                    suggestedUsers.Add(userSuggestedRespose);
                 };
