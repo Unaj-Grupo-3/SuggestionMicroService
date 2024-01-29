@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 
 namespace SuggestionMicroService.Controllers
 {
@@ -48,7 +46,6 @@ namespace SuggestionMicroService.Controllers
                 var identity = HttpContext.User.Identity as ClaimsIdentity;
                 int userId = _tokenServices.GetUserId(identity);
 
-                //IList<SuggestionResponse> response = await _suggestionServices.GetSuggestionsByUserId(userId);
                 SuggestionResponse response = new();
                 response = await _suggestionServices.GetSuggestionsByUserId(userId);
 

@@ -1,10 +1,8 @@
 ﻿using Application.Interfaces;
-using Application.Models;
 using Domain.Entities;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
+
 
 namespace Infrastructure.Queries
 {
