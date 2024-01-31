@@ -138,8 +138,7 @@ namespace Application.UseCases
                         user.LastName = (string)i.SelectToken("lastName");
                         user.Description = (string)i.SelectToken("description");
                         user.Birthday = (DateTime)i.SelectToken("birthday");
-                        //birthday description location {id latitude longitude address } images[{id url}] gender {genderId description}
-                        // location
+                        
                         JToken locationToken = i.SelectToken("location");
                         if (locationToken != null)
                         {

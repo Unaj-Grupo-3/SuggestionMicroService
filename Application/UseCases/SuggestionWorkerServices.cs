@@ -1,8 +1,6 @@
 ﻿using Application.Interfaces;
 using Application.Models;
 using Domain.Entities;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using Application.Helpers;
 
 namespace Application.UseCases
@@ -31,7 +29,7 @@ namespace Application.UseCases
         {
             try
             {
-                //await _suggestionCommand.DeleteWorkerSuggByUserId(userId); // borra todas las sugerencias por ID 
+                
                 var responseUser = await _userApiServices.GetAllUsersObj();
                 var responsePreference = await _preferenceApiServices.GetAllPreferenceObj();
                 var responseUserMatch = await _userMatchApiServices.GetAllMatches();
